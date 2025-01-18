@@ -1,0 +1,26 @@
+services:
+  ray-head:
+    image: ml-apps:latest
+    ports:
+      - "8201:8201" ## dashboard port
+      - "8200:8200" ## serve port 
+      - "20001:20001" ## client port
+      - "6380:6380" ## gcs port
+    # ray-client-server-port, dashboard-port and port(global control store port) can be customized by specifying in the params
+    # serve port can be customized by specifying port under http_options
+    command: bash -c "ray start --head --ray-client-server-port=20001 --dashboard-port=8201 --port=6380 --dashboard-host=0.0.0.0 --block"
+    networks:
+      - ray_net
+
+  ray-worker:
+    image: ml-apps:latest
+    depends_on: 
+      - ray-head
+    command: bash -c "ray start --address ray-head:6380 && serve run config.yaml" 
+    networks:
+      - ray_net
+ 
+networks:
+  ray_net:
+    ipam:
+      driver: default

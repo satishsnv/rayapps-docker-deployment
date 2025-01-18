@@ -1,0 +1,35 @@
+# config.yaml
+proxy_location: EveryNode
+
+http_options:
+  host: 0.0.0.0
+  port: 8200
+
+logging_config:
+  encoding: TEXT
+  log_level: INFO
+  logs_dir: null
+  enable_access_log: true
+
+applications:
+- name: summarizer
+  route_prefix: /summarize
+  import_path: summarizer.service:deployment
+  runtime_env: {"pip": "summarizer/requirements.txt", config: {"setup_timeout_seconds": 1200}}
+  deployments:
+  - name: Summarizer
+    num_replicas: 2
+    ray_actor_options:
+      num_cpus: 0.2
+      num_gpus: 0.0
+
+- name: translator
+  route_prefix: /translate
+  import_path: translator.service:deployment
+  runtime_env: {"pip": "translator/requirements.txt", config: {"setup_timeout_seconds": 1200}}
+  deployments:
+  - name: Translator
+    num_replicas: 2
+    ray_actor_options:
+      num_cpus: 0.2
+      num_gpus: 0.0
